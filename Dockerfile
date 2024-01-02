@@ -1,27 +1,17 @@
-FROM ubuntu:latest
+FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -e \
     && apt -y update -qq \
-    && apt -y install --no-install-recommends software-properties-common dirmngr wget \
+    && apt -y install --no-install-recommends software-properties-common dirmngr wget gpg-agent locales \
+        curl gdebi libssl1.1 make curl psmisc libclang-dev sudo gcc g++ gfortran libblas-dev liblapack-dev \
+        cmake pkg-config libcurl4-openssl-dev libz-dev libmagick++-dev \
     && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
-    && add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/"
-
-RUN set -e \
-      && apt-get -y update \
-      && apt-get -y dist-upgrade \
-      && apt-get -y install --no-install-recommends --no-install-suggests \
-        apt-transport-https apt-utils ca-certificates cmake curl g++ gcc \
-        gfortran git make libblas-dev libcurl4-gnutls-dev libfontconfig1-dev \
-        libfreetype6-dev libfribidi-dev libgit2-dev libharfbuzz-dev \
-        libiodbc2-dev libjpeg-dev liblapack-dev libmariadb-dev libpng-dev \
-        libpq-dev libsqlite3-dev libssh-dev libssl-dev libtiff5-dev \
-        libxml2-dev locales pandoc pkg-config gpg-agent sudo \
-        gdebi-core libapparmor1 libclang-dev lsb-release psmisc \
-      && apt-get -y autoremove \
-      && apt-get clean \
-      && rm -rf /var/lib/apt/lists/*
+    && add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
+    && apt-get -y autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN set -e \
     && add-apt-repository ppa:marutter/rrutter4.0 \
@@ -36,16 +26,21 @@ ENV CRAN_URL https://cloud.r-project.org/
 RUN set -e \
       && apt-get -y update \
       && apt-get -y install --no-install-recommends --no-install-suggests \
-        r-base \
+        r-base r-base-dev \
       && apt-get -y autoremove \
       && apt-get clean \
       && rm -rf /var/lib/apt/lists/*
 
+# Add Michael Rutter's c2d4u4.0 PPA (and rrutter4.0 for CRAN builds too)
+RUN set -e \
+    && apt -y update \
+    && apt -y install --no-install-recommends --no-install-suggests \
+        r-cran-rstan r-cran-tidyverse \
+    && apt-get -y autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN set -e \
-    && R -e "install.packages(c('tidyverse', 'rmarkdown', 'ggpubr', 'foreach', 'doParallel', 'dbplyr'))" 
-
-RUN set -eo pipefail \
       && curl -SL https://s3.amazonaws.com/rstudio-server/current.ver \
         | sed -e 's/+/-/; s/\.[a-z]\+[0-9]\+$//;' \
         | xargs -I{} curl -SL -o /tmp/rstudio-server.deb \
@@ -59,22 +54,13 @@ RUN set -e \
       && useradd -m -d /home/rstudio -g rstudio-server rstudio \
       && echo rstudio:rstudio | chpasswd
 
-# Add Michael Rutter's c2d4u4.0 PPA (and rrutter4.0 for CRAN builds too)
 RUN set -e \
-    && apt -y update \
-    && apt -y install --no-install-recommends --no-install-suggests \
-        r-cran-rstan r-cran-tidyverse \
-    && apt-get -y autoremove \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-
-RUN set -e \
-    && R -e "install.packages('rstan', repos = c('https://mc-stan.org/r-packages/', getOption('repos')))" \
+    && R -e "install.packages('cmdstanr', repos = c('https://mc-stan.org/r-packages/', getOption('repos')))" \
+    && R -e "cmdstanr::install_cmdstan()" \
     && R -e "options(mc.cores = parallel::detectCores())"
 
 RUN set -e \
-    && R -e "install.packages(c('coda','mvtnorm','devtools','loo','dagitty','shape'))" \
+    && R -e "install.packages(c('coda','mvtnorm','devtools','loo','dagitty','shape', 'bayesplot', 'animation', 'ellipse', 'plotrix'))" \
     && R -e "devtools::install_github('rmcelreath/rethinking')"
 
 EXPOSE 8787
