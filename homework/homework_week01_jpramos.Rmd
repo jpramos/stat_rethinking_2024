@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Homework, Week1
 
-### 1. Suppose the globe tossing data had turned out to be 3 water and 11 land. Construct the posterior distribution
+### 1. Suppose the globe tossing data had turned out to be 3 water and 11 land. Construct the posterior distribution.
 
 ```{r}
 
@@ -49,4 +49,4 @@ tab_post <- table(pred_post)
 plot( tab_post , xlim=c(0,n_tosses) , xlab="number of W" , ylab="count" )
 ```
 
-Given the posterior distribution we could say that in the next 5 tosses, we would 1 sample of water.
+Given the posterior distribution we could say that in the next 5 tosses, we would see 1 sample of water.
