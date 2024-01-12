@@ -1,0 +1,52 @@
+---
+title: "homework week01"
+author: "Joao Pedro Ramos"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Homework, Week1
+
+### 1. Suppose the globe tossing data had turned out to be 3 water and 11 land. Construct the posterior distribution
+
+```{r}
+
+n_water = 3
+n_land = 11
+
+the_sample = rep(c("W", "L"), c(n_water, n_land))
+
+compute_posterior <- function( p , the_sample , the_prior ) {
+W <- sum(the_sample=="W")
+L <- sum(the_sample=="L")
+W_prior <- sum(the_prior=="W")
+L_prior <- sum(the_prior=="L")
+dbeta(p,W+W_prior+1,L+L_prior+1)
+}
+curve( compute_posterior(x,the_sample,c()) , from=0 , to=1 )
+
+```
+
+### 2. Using the posterior distribution from 1, compute the posterior predictive distribution for the next 5 tosses of the same globe.
+
+```{r}
+
+n_tosses = 5
+
+sim_globe <- function(p_water=.5, N=10) {
+  sample(c("W", "L"), size=N, prob=c(p_water, 1-p_water), replace=TRUE)
+}
+
+
+# simulate posterior predictive distribution
+post_samples <- rbeta(1e4,n_water+1, n_land+1)
+pred_post <- sapply( post_samples , function(p) sum(sim_globe(p,5)=="W") )
+tab_post <- table(pred_post)
+plot( tab_post , xlim=c(0,n_tosses) , xlab="number of W" , ylab="count" )
+```
+
+Given the posterior distribution we could say that in the next 5 tosses, we would 1 sample of water.
