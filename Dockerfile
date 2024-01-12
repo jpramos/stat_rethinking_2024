@@ -7,6 +7,7 @@ RUN set -e \
     && apt -y install --no-install-recommends software-properties-common dirmngr wget gpg-agent locales \
         curl gdebi libssl1.1 make curl psmisc libclang-dev sudo gcc g++ gfortran libblas-dev liblapack-dev \
         cmake pkg-config libcurl4-openssl-dev libz-dev libmagick++-dev \
+	texlive-full \
     && wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc \
     && add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
     && apt-get -y autoremove \
