@@ -66,5 +66,12 @@ RUN set -e \
 
 EXPOSE 8787
 
-ENTRYPOINT ["/usr/lib/rstudio-server/bin/rserver"]
-CMD ["--server-daemonize=0", "--server-app-armor-enabled=0"]
+COPY ./entrypoint.sh /home/rstudio/entrypoint.sh
+
+# RUN mkdir /home/rstudio/homework && chown -R rstudio:rstudio-server /home/rstudio/homework
+# RUN mkdir /home/rstudio/scripts && chown -R rstudio:rstudio-server /home/rstudio/scripts
+
+
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+# ENTRYPOINT ["/usr/lib/rstudio-server/bin/rserver"]
+CMD ["/usr/lib/rstudio-server/bin/rserver", "--server-daemonize=0", "--server-app-armor-enabled=0"]

@@ -9,10 +9,13 @@ services:
     ports:
       - 8787:8787
     volumes:
-      - .:/home/rstudio
+      # - .:/home/rstudio
+      - ./homework:/home/rstudio/homework
+      - ./scripts:/home/rstudio/scripts
+      - ./book_scripts:/home/rstudio/book_scripts
     working_dir: /home/rstudio
-    entrypoint:
-      - /usr/lib/rstudio-server/bin/rserver
-    command:
-      - --server-daemonize=0
-      - --server-app-armor-enabled=0
+      #entrypoint:
+      #  - /usr/lib/rstudio-server/bin/rserver
+      #command:
+      #  - --server-daemonize=0
+      #  - --server-app-armor-enabled=0
